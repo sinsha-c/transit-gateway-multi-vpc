@@ -108,6 +108,7 @@ In each VPC's subnet route table, add routes pointing to the Transit Gateway for
 | VPC-D | 10.0.0.0/16, 172.16.0.0/16, 192.168.0.0/16          | TGW    |
  
 <img src="screenshots/step6-vpc-route-tables.png" alt="Step 6 - VPC Route Table Updates" width="700">
+
 ---
  
 ### Step 7: Update Security Groups
@@ -167,13 +168,11 @@ A successful ping/SSH here confirms the full path: VPC-A route table → TGW att
  
 ## Key Learnings
  
-- **Hub-and-spoke vs. full mesh:** Transit Gateway scales linearly (N attachments) instead of the quadratic growth (N(N-1)/2 peering connections) required by VPC peering.
-- **Public IP ≠ VPC-to-VPC connectivity:** having a public IP only lets the internet reach an instance through its own VPC's IGW — it does nothing for reaching another VPC. Only routing (TGW/peering) can create that path.
-- **Routing happens before security groups matter:** if there's no TGW route for the destination CIDR, the packet never leaves the source VPC — the destination's security group is never even evaluated. Route table + TGW route table + security group all have to line up.
-- **Private subnets work identically over TGW:** EC2-B/C/D need no internet access at all to be reachable via TGW — only their VPC route table needs an entry pointing the peer CIDRs to the TGW.
-- **Bastion pattern:** with only EC2-A public, it doubles as the entry point for the whole environment — a common, low-cost way to reach private resources without a NAT Gateway or SSM setup.
-- **Route table segmentation:** TGW route tables can isolate traffic between VPC groups even though they share the same hub.
-- **Route propagation:** Attachments can auto-propagate routes into the TGW route table, or routes can be added manually for tighter control.
+- **TGW beats full-mesh peering:** 4 VPCs need only 4 TGW attachments, vs. 6 separate peering connections.
+- **A public IP doesn't connect VPCs:** it only lets the internet reach that one instance. Only TGW (or peering) lets VPCs talk to each other.
+- **Routing comes before security groups:** if there's no route to the destination, the packet never gets there — the security group never even gets a say.
+- **Private subnets work fine over TGW:** EC2-B/C/D don't need internet access to be reachable — just a route to the TGW.
+
 ---
  
 ## Cleanup
