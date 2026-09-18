@@ -21,7 +21,7 @@ Instead of creating **6 separate peering connections** (the number required for 
 
 ## Architecture Diagram
 
-<img src="docs/architecture-diagram.png" alt="Transit Gateway Architecture Diagram" width="800">
+<img src="docs/architecture-diagram.png" alt="Transit Gateway Architecture Diagram" width="700">
 
 *Each VPC attaches to the Transit Gateway independently. Traffic between any two VPCs is routed through the TGW rather than through direct peering links, giving a hub-and-spoke model instead of a full mesh.*
 
@@ -33,6 +33,7 @@ Instead of creating **6 separate peering connections** (the number required for 
 - AWS CLI or Console access
 - Basic understanding of VPC networking, route tables, and security groups
 - Free Tier-friendly instance types (e.g., `t2.micro` / `t3.micro`)
+
 ---
  
 ## Lab Steps
@@ -51,6 +52,7 @@ Create four VPCs, each with a non-overlapping CIDR block:
 Only **VPC-A** needs an Internet Gateway attached and a `0.0.0.0/0 → IGW` route in its subnet's route table, since it hosts the bastion (EC2-A). VPC-B, VPC-C, and VPC-D use fully private subnets — no IGW, no public route.
  
 <img src="screenshots/step1-vpc-creation.png" alt="Step 1 - VPC Creation" width="700">
+
 ---
  
 ### Step 2: Launch a Test EC2 Instance in Each VPC
@@ -62,6 +64,7 @@ Launch one EC2 instance per VPC:
 Use the **same key pair** across all four instances (or copy the private key onto EC2-A) so you can SSH from EC2-A into B, C, and D without extra setup.
  
 <img src="screenshots/step2-ec2-instances.png" alt="Step 2 - EC2 Instances Launched" width="700">
+
 ---
  
 ### Step 3: Create the Transit Gateway
@@ -72,6 +75,7 @@ Navigate to **VPC Console → Transit Gateways → Create Transit Gateway**.
 - Amazon side ASN: default
 - Enable default route table association and propagation (or disable for manual control, depending on your design)
 <img src="screenshots/step3-tgw-creation.png" alt="Step 3 - Transit Gateway Creation" width="700">
+
 ---
  
 ### Step 4: Attach Each VPC to the Transit Gateway
@@ -85,6 +89,7 @@ Create a **Transit Gateway VPC Attachment** for each of the 4 VPCs:
 For each attachment, select the VPC and its associated subnet(s).
  
 <img src="screenshots/step4-tgw-attachments.png" alt="Step 4 - VPC Attachments to TGW" width="700">
+
 ---
  
 ### Step 5: Configure Transit Gateway Route Tables
@@ -94,6 +99,7 @@ Review or create TGW route table(s) to define which attachments can route traffi
 For a segmented design (e.g., VPC-A and VPC-B isolated from VPC-C and VPC-D), create separate TGW route tables per group.
  
 <img src="screenshots/step5-tgw-route-table.png" alt="Step 5 - TGW Route Table Configuration" width="700">
+
 ---
  
 ### Step 6: Update Each VPC's Route Table
@@ -151,7 +157,9 @@ ping 10.3.0.X             # EC2-D private IP, from EC2-B
 ```
  
 <img src="screenshots/step8-connectivity-test2.png" alt="Step 8 - Connectivity Test Results" width="700">
+
 *OR*
+
 <img src="screenshots/step8-connectivity-test3.png" alt="Step 8 - Connectivity Test Results" width="700">
 
 A successful ping/SSH here confirms the full path: VPC-A route table → TGW attachment → Transit Gateway → TGW attachment → VPC-B/C/D route table → EC2-B/C/D — all without the traffic ever touching the internet.
@@ -164,6 +172,7 @@ A successful ping/SSH here confirms the full path: VPC-A route table → TGW att
 - Verified connectivity from a public bastion (EC2-A) to three fully private instances (EC2-B, EC2-C, EC2-D) purely over private IPs
 - Demonstrated reduced routing complexity vs. full-mesh VPC peering (1 hub vs. 6 peering connections)
 - Confirmed that TGW routing works independently of internet access — private subnets need no IGW or NAT to reach each other
+
 ---
  
 ## Key Learnings
