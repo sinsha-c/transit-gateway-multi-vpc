@@ -121,6 +121,7 @@ In each VPC's subnet route table, add routes pointing to the Transit Gateway for
  
 - **EC2-A's security group:** allow inbound SSH (22) from your laptop's public IP (or `0.0.0.0/0` for testing only)
 - **EC2-B, EC2-C, EC2-D's security groups:** allow inbound SSH (22) and **All ICMP - IPv4** (not just Echo Request) from **VPC-A's CIDR (10.0.0.0/16)** — the bastion — **and from each other's CIDRs**, so that once you're on EC2-B (for example), you can also ping/SSH EC2-C and EC2-D directly rather than routing back through EC2-A each time. Selecting "All ICMP - IPv4" as the rule type (rather than a single ICMP type) ensures both the echo request and the echo reply are permitted, so `ping` actually returns a response.
+
 | Instance | Rule | Source |
 |----------|------|--------|
 | EC2-A | SSH (22) | Your laptop's IP |
